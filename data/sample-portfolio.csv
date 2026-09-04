@@ -1,0 +1,6 @@
+Asset,Asset_Class,Quantity,Purchase_Price,Current_Price
+AAPL,Equity,20,180,210
+MSFT,Equity,10,400,430
+BND,Bond,30,70,72
+GLD,Commodity,15,180,190
+SPY,ETF,10,450,475
