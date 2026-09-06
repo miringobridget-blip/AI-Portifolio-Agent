@@ -897,7 +897,142 @@ allocation_chart = allocation_table.set_index(
 
 st.bar_chart(allocation_chart)
 
+# ============================================================
+# CONCENTRATION RISK ANALYSIS
+# ============================================================
 
+st.divider()
+
+st.header("🎯 Concentration Risk Analysis")
+
+st.write(
+    """
+    Concentration analysis identifies investments that represent
+    a large proportion of the total portfolio value.
+    """
+)
+
+
+# ------------------------------------------------------------
+# Calculate asset concentration
+# ------------------------------------------------------------
+
+concentration_table = portfolio[
+    ["Asset", "Current_Value", "Allocation_Percentage"]
+].copy()
+
+concentration_table = concentration_table.rename(
+    columns={
+        "Current_Value": "Current Value",
+        "Allocation_Percentage": "Portfolio Weight (%)"
+    }
+)
+
+concentration_table["Portfolio Weight (%)"] = (
+    concentration_table["Portfolio Weight (%)"].round(2)
+)
+
+concentration_table = concentration_table.sort_values(
+    "Portfolio Weight (%)",
+    ascending=False
+)
+
+
+# ------------------------------------------------------------
+# Identify largest holding
+# ------------------------------------------------------------
+
+largest_holding = concentration_table.iloc[0]
+
+largest_asset = largest_holding["Asset"]
+
+largest_weight = largest_holding["Portfolio Weight (%)"]
+
+
+# ------------------------------------------------------------
+# Display largest holding
+# ------------------------------------------------------------
+
+col1, col2 = st.columns(2)
+
+with col1:
+
+    st.metric(
+        "Largest Holding",
+        largest_asset
+    )
+
+with col2:
+
+    st.metric(
+        "Largest Portfolio Weight",
+        f"{largest_weight:.2f}%"
+    )
+
+
+# ------------------------------------------------------------
+# Concentration thresholds
+# ------------------------------------------------------------
+
+concentration_threshold = 25
+
+high_concentration = concentration_table[
+    concentration_table["Portfolio Weight (%)"]
+    >= concentration_threshold
+]
+
+
+# ------------------------------------------------------------
+# Display concentration table
+# ------------------------------------------------------------
+
+st.subheader("Portfolio Concentration")
+
+st.dataframe(
+    concentration_table,
+    use_container_width=True
+)
+
+
+# ------------------------------------------------------------
+# Concentration alerts
+# ------------------------------------------------------------
+
+st.subheader("🚨 Concentration Alerts")
+
+
+if len(high_concentration) > 0:
+
+    for _, row in high_concentration.iterrows():
+
+        st.warning(
+            f"⚠️ {row['Asset']} represents "
+            f"{row['Portfolio Weight (%)']:.2f}% "
+            f"of the portfolio. This indicates "
+            f"relatively high concentration risk."
+        )
+
+else:
+
+    st.success(
+        "✅ No individual investment exceeds the "
+        "illustrative 25% concentration threshold."
+    )
+
+
+# ------------------------------------------------------------
+# Concentration chart
+# ------------------------------------------------------------
+
+st.subheader("📊 Portfolio Concentration")
+
+concentration_chart = concentration_table.set_index(
+    "Asset"
+)[["Portfolio Weight (%)"]]
+
+st.bar_chart(
+    concentration_chart
+)
 # ============================================================
 # AI-ASSISTED RECOMMENDATION
 # ============================================================
@@ -985,7 +1120,26 @@ elif performance_difference < 0:
         f"The portfolio is underperforming the benchmark "
         f"by {abs(performance_difference):.2f} percentage points."
     )
+# ------------------------------------------------------------
+# Add concentration risk to recommendation
+# ------------------------------------------------------------
 
+if len(high_concentration) > 0:
+
+    for _, row in high_concentration.iterrows():
+
+        recommendations.append(
+            f"{row['Asset']} represents "
+            f"{row['Portfolio Weight (%)']:.2f}% of the portfolio, "
+            f"indicating elevated concentration risk."
+        )
+
+else:
+
+    recommendations.append(
+        "No individual investment exceeds the "
+        "illustrative concentration threshold."
+    )
 
 # ============================================================
 # DIAGNOSIS
