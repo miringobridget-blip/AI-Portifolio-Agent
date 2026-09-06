@@ -249,7 +249,32 @@ st.write(t["description"])
 
 st.divider()
 
+# ============================================================
+# INVESTOR RISK PROFILE
+# ============================================================
 
+st.sidebar.divider()
+
+st.sidebar.header("🎯 Investor Risk Profile")
+
+risk_profile = st.sidebar.selectbox(
+    "Select investor risk tolerance",
+    [
+        "Conservative",
+        "Moderate",
+        "Aggressive"
+    ]
+)
+
+risk_profile_description = {
+    "Conservative": "Lower tolerance for portfolio risk.",
+    "Moderate": "Balanced tolerance for portfolio risk.",
+    "Aggressive": "Higher tolerance for portfolio risk."
+}
+
+st.sidebar.info(
+    risk_profile_description[risk_profile]
+)
 # ============================================================
 # PORTFOLIO INPUT
 # ============================================================
@@ -591,7 +616,36 @@ st.metric(
     t["risk_level"],
     risk_level
 )
+# ============================================================
+# RISK PROFILE ASSESSMENT
+# ============================================================
 
+st.subheader("🎯 Investor Risk Profile Assessment")
+
+risk_thresholds = {
+    "Conservative": 10,
+    "Moderate": 20,
+    "Aggressive": 30
+}
+
+acceptable_volatility = risk_thresholds[risk_profile]
+
+if portfolio_volatility <= acceptable_volatility:
+
+    st.success(
+        f"✅ Portfolio risk appears consistent with the "
+        f"{risk_profile.lower()} investor profile."
+    )
+
+else:
+
+    st.warning(
+        f"⚠️ Portfolio volatility of "
+        f"{portfolio_volatility:.2f}% is above the "
+        f"illustrative threshold of "
+        f"{acceptable_volatility}% for a "
+        f"{risk_profile.lower()} investor."
+    )
 
 # ============================================================
 # RISK ALERTS
@@ -860,7 +914,21 @@ st.write(
 )
 
 recommendations = []
+# Compare portfolio risk with investor profile
 
+if portfolio_volatility > acceptable_volatility:
+
+    recommendations.append(
+        f"Portfolio volatility may be high relative to "
+        f"the selected {risk_profile.lower()} investor profile."
+    )
+
+else:
+
+    recommendations.append(
+        f"Portfolio volatility appears consistent with "
+        f"the selected {risk_profile.lower()} investor profile."
+    )
 
 if len(overweight_assets) > 0:
 
