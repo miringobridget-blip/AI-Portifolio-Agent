@@ -493,3 +493,155 @@ else:
     st.error(
         "Benchmark data is unavailable."
     )
+# ---------------------------------------------------
+# Portfolio Allocation & Over/Underweight Analysis
+# ---------------------------------------------------
+
+st.divider()
+
+st.header("⚖️ Portfolio Allocation Analysis")
+
+# Target allocation for our simulated portfolio
+target_allocation = {
+    "Equity": 50,
+    "Bond": 25,
+    "Commodity": 10,
+    "ETF": 15
+}
+
+# Calculate current value by asset class
+allocation_by_class = (
+    portfolio.groupby("Asset_Class")["Current_Value"]
+    .sum()
+)
+
+# Calculate percentage allocation
+allocation_percentage = (
+    allocation_by_class
+    / portfolio["Current_Value"].sum()
+    * 100
+)
+
+# Create allocation table
+allocation_table = pd.DataFrame({
+    "Asset Class": allocation_percentage.index,
+    "Current Allocation (%)": allocation_percentage.values
+})
+
+# Add target allocation
+allocation_table["Target Allocation (%)"] = (
+    allocation_table["Asset Class"]
+    .map(target_allocation)
+)
+
+# Calculate difference
+allocation_table["Difference (%)"] = (
+    allocation_table["Current Allocation (%)"]
+    - allocation_table["Target Allocation (%)"]
+)
+
+
+# ---------------------------------------------------
+# Classify allocation
+# ---------------------------------------------------
+
+def classify_allocation(difference):
+
+    if difference > 5:
+        return "Overweight"
+
+    elif difference < -5:
+        return "Underweight"
+
+    else:
+        return "Within Target"
+
+
+allocation_table["Status"] = (
+    allocation_table["Difference (%)"]
+    .apply(classify_allocation)
+)
+
+
+# Round numbers
+allocation_table["Current Allocation (%)"] = (
+    allocation_table["Current Allocation (%)"].round(2)
+)
+
+allocation_table["Target Allocation (%)"] = (
+    allocation_table["Target Allocation (%)"].round(2)
+)
+
+allocation_table["Difference (%)"] = (
+    allocation_table["Difference (%)"].round(2)
+)
+
+
+# ---------------------------------------------------
+# Display allocation table
+# ---------------------------------------------------
+
+st.subheader("Current vs Target Allocation")
+
+st.dataframe(
+    allocation_table,
+    use_container_width=True
+)
+
+
+# ---------------------------------------------------
+# Allocation alerts
+# ---------------------------------------------------
+
+st.subheader("🚨 Allocation Alerts")
+
+overweight_assets = allocation_table[
+    allocation_table["Status"] == "Overweight"
+]
+
+underweight_assets = allocation_table[
+    allocation_table["Status"] == "Underweight"
+]
+
+
+if len(overweight_assets) > 0:
+
+    for _, row in overweight_assets.iterrows():
+
+        st.warning(
+            f"⚠️ {row['Asset Class']} is overweight by "
+            f"{row['Difference (%)']:.2f} percentage points."
+        )
+
+
+if len(underweight_assets) > 0:
+
+    for _, row in underweight_assets.iterrows():
+
+        st.info(
+            f"ℹ️ {row['Asset Class']} is underweight by "
+            f"{abs(row['Difference (%)']):.2f} percentage points."
+        )
+
+
+if len(overweight_assets) == 0 and len(underweight_assets) == 0:
+
+    st.success(
+        "✅ All asset classes are within the target allocation range."
+    )
+
+
+# ---------------------------------------------------
+# Allocation chart
+# ---------------------------------------------------
+
+st.subheader("📊 Current vs Target Allocation")
+
+allocation_chart = allocation_table.set_index(
+    "Asset Class"
+)[[
+    "Current Allocation (%)",
+    "Target Allocation (%)"
+]]
+
+st.bar_chart(allocation_chart)
