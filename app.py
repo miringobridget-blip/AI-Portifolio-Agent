@@ -708,29 +708,25 @@ with overview_col4:
 
 st.subheader("🏥 Portfolio Health")
 
-if (
-    risk_level == "Low"
-    and performance_difference >= 0
-    and len(high_concentration) == 0
-):
-
-    st.success(
-        "🟢 Portfolio indicators are currently within "
-        "acceptable ranges."
-    )
-
-elif risk_level == "High" or len(high_concentration) > 0:
+if risk_level == "High":
 
     st.error(
-        "🔴 Portfolio requires closer review due to "
-        "elevated risk or concentration."
+        "🔴 Portfolio requires closer review because "
+        "the measured risk level is high."
+    )
+
+elif performance_difference < 0:
+
+    st.warning(
+        "🟡 Portfolio requires monitoring because it is "
+        "currently underperforming the benchmark."
     )
 
 else:
 
-    st.warning(
-        "🟡 Portfolio is generally stable but has "
-        "one or more indicators requiring monitoring."
+    st.success(
+        "🟢 Portfolio indicators are currently stable "
+        "based on the available analysis."
     )
 
 # ============================================================
