@@ -661,6 +661,79 @@ else:
     )
 
 # ============================================================
+# PROFESSIONAL PORTFOLIO OVERVIEW
+# ============================================================
+
+st.divider()
+
+st.header("📊 Portfolio Overview")
+
+st.write(
+    "A high-level view of the portfolio's current financial position."
+)
+
+overview_col1, overview_col2, overview_col3, overview_col4 = st.columns(4)
+
+with overview_col1:
+
+    st.metric(
+        "💰 Portfolio Value",
+        f"${total_current_value:,.2f}"
+    )
+
+with overview_col2:
+
+    st.metric(
+        "📈 Portfolio Return",
+        f"{total_return:.2f}%"
+    )
+
+with overview_col3:
+
+    st.metric(
+        "⚠️ Risk Level",
+        risk_level
+    )
+
+with overview_col4:
+
+    st.metric(
+        "🎯 Investor Profile",
+        risk_profile
+    )
+
+# ============================================================
+# PORTFOLIO HEALTH INDICATOR
+# ============================================================
+
+st.subheader("🏥 Portfolio Health")
+
+if (
+    risk_level == "Low"
+    and performance_difference >= 0
+    and len(high_concentration) == 0
+):
+
+    st.success(
+        "🟢 Portfolio indicators are currently within "
+        "acceptable ranges."
+    )
+
+elif risk_level == "High" or len(high_concentration) > 0:
+
+    st.error(
+        "🔴 Portfolio requires closer review due to "
+        "elevated risk or concentration."
+    )
+
+else:
+
+    st.warning(
+        "🟡 Portfolio is generally stable but has "
+        "one or more indicators requiring monitoring."
+    )
+
+# ============================================================
 # RISK ALERTS
 # ============================================================
 
