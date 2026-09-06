@@ -415,4 +415,81 @@ st.bar_chart(
 st.success(
     "Risk and volatility analysis completed successfully."
 )
+# ---------------------------------------------------
+# Benchmark Comparison
+# ---------------------------------------------------
 
+st.divider()
+
+st.header("📈 Benchmark Comparison")
+
+# SPY is used as our simulated benchmark
+benchmark_name = "SPY"
+
+if benchmark_name in historical_returns.columns:
+
+    # Calculate cumulative benchmark return
+    benchmark_return = (
+        (1 + historical_returns[benchmark_name]).prod() - 1
+    ) * 100
+
+    # Calculate cumulative portfolio return
+    portfolio_return = (
+        (1 + portfolio_returns).prod() - 1
+    ) * 100
+
+    # Difference between portfolio and benchmark
+    performance_difference = (
+        portfolio_return - benchmark_return
+    )
+
+    # Display results
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.metric(
+            "Portfolio Return",
+            f"{portfolio_return:.2f}%"
+        )
+
+    with col2:
+        st.metric(
+            "Benchmark Return",
+            f"{benchmark_return:.2f}%"
+        )
+
+    with col3:
+        st.metric(
+            "Difference",
+            f"{performance_difference:+.2f}%"
+        )
+
+    # Interpretation
+    if performance_difference > 0:
+
+        st.success(
+            f"✅ The portfolio outperformed the "
+            f"{benchmark_name} benchmark by "
+            f"{performance_difference:.2f} percentage points."
+        )
+
+    elif performance_difference < 0:
+
+        st.warning(
+            f"⚠️ The portfolio underperformed the "
+            f"{benchmark_name} benchmark by "
+            f"{abs(performance_difference):.2f} percentage points."
+        )
+
+    else:
+
+        st.info(
+            "The portfolio performed approximately "
+            "in line with the benchmark."
+        )
+
+else:
+
+    st.error(
+        "Benchmark data is unavailable."
+    )
