@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-
+from recommendation_engine import generate_recommendation
 
 # ============================================================
 # PAGE CONFIGURATION
@@ -1140,11 +1140,85 @@ else:
         "No individual investment exceeds the "
         "illustrative concentration threshold."
     )
+# ============================================================
+# STRUCTURED RECOMMENDATION ENGINE
+# ============================================================
 
+ai_result = generate_recommendation(
+    portfolio_volatility=portfolio_volatility,
+    risk_level=risk_level,
+    risk_profile=risk_profile,
+    performance_difference=performance_difference,
+    high_concentration=high_concentration,
+    overweight_assets=overweight_assets,
+    underweight_assets=underweight_assets
+)
 # ============================================================
 # DIAGNOSIS
 # ============================================================
+st.subheader("🧠 AI Portfolio Diagnosis")
 
+priority = ai_result["priority"]
+
+if priority == "High":
+
+    st.error(
+        f"Priority Level: {priority}"
+    )
+
+elif priority == "Medium":
+
+    st.warning(
+        f"Priority Level: {priority}"
+    )
+
+else:
+
+    st.success(
+        f"Priority Level: {priority}"
+    )
+
+
+st.write(
+    ai_result["diagnosis"]
+)
+
+
+# ============================================================
+# KEY FINDINGS
+# ============================================================
+
+st.subheader("🔎 Key Findings")
+
+for finding in ai_result["findings"]:
+
+    st.write(
+        f"• {finding}"
+    )
+
+
+# ============================================================
+# RECOMMENDED ACTIONS
+# ============================================================
+
+st.subheader("💡 Recommended Actions")
+
+for action in ai_result["actions"]:
+
+    st.write(
+        f"• {action}"
+    )
+
+
+# ============================================================
+# FINAL RECOMMENDATION
+# ============================================================
+
+st.subheader("🤖 AI-Assisted Recommendation")
+
+st.info(
+    ai_result["recommendation"]
+)
 st.subheader(t["diagnosis"])
 
 for recommendation in recommendations:
