@@ -645,3 +645,213 @@ allocation_chart = allocation_table.set_index(
 ]]
 
 st.bar_chart(allocation_chart)
+# ---------------------------------------------------
+# AI-Assisted Portfolio Recommendation
+# ---------------------------------------------------
+
+st.divider()
+
+st.header("🤖 AI-Assisted Portfolio Recommendation")
+
+st.write(
+    """
+    The recommendation engine reviews portfolio performance,
+    risk and allocation results to provide decision-support insights.
+    """
+)
+
+
+# ---------------------------------------------------
+# Collect portfolio findings
+# ---------------------------------------------------
+
+recommendations = []
+
+
+# Check allocation
+if len(overweight_assets) > 0:
+
+    for _, row in overweight_assets.iterrows():
+
+        recommendations.append(
+            f"{row['Asset Class']} is overweight by "
+            f"{row['Difference (%)']:.2f} percentage points."
+        )
+
+
+if len(underweight_assets) > 0:
+
+    for _, row in underweight_assets.iterrows():
+
+        recommendations.append(
+            f"{row['Asset Class']} is underweight by "
+            f"{abs(row['Difference (%)']):.2f} percentage points."
+        )
+
+
+# Check portfolio risk
+if portfolio_volatility >= 20:
+
+    recommendations.append(
+        f"Portfolio volatility is high at "
+        f"{portfolio_volatility:.2f}%."
+    )
+
+elif portfolio_volatility >= 10:
+
+    recommendations.append(
+        f"Portfolio volatility is moderate at "
+        f"{portfolio_volatility:.2f}%."
+    )
+
+else:
+
+    recommendations.append(
+        f"Portfolio volatility is relatively low at "
+        f"{portfolio_volatility:.2f}%."
+    )
+
+
+# Check benchmark performance
+if performance_difference > 0:
+
+    recommendations.append(
+        f"The portfolio is outperforming the benchmark "
+        f"by {performance_difference:.2f} percentage points."
+    )
+
+elif performance_difference < 0:
+
+    recommendations.append(
+        f"The portfolio is underperforming the benchmark "
+        f"by {abs(performance_difference):.2f} percentage points."
+    )
+
+else:
+
+    recommendations.append(
+        "The portfolio is performing approximately "
+        "in line with the benchmark."
+    )
+
+
+# ---------------------------------------------------
+# Display portfolio diagnosis
+# ---------------------------------------------------
+
+st.subheader("Portfolio Diagnosis")
+
+for recommendation in recommendations:
+
+    st.write(f"• {recommendation}")
+
+
+# ---------------------------------------------------
+# Generate recommendation
+# ---------------------------------------------------
+
+st.subheader("💡 Recommended Action")
+
+
+if portfolio_volatility >= 20:
+
+    st.warning(
+        """
+        The portfolio shows elevated risk.
+
+        Consider reviewing highly volatile assets,
+        portfolio concentration and the investor's
+        risk tolerance before making any changes.
+        """
+    )
+
+elif len(overweight_assets) > 0:
+
+    st.warning(
+        """
+        The portfolio contains one or more overweight
+        asset classes.
+
+        Consider reviewing the current allocation against
+        the investor's target allocation and risk objectives.
+        """
+    )
+
+elif performance_difference < 0:
+
+    st.info(
+        """
+        The portfolio is currently underperforming its
+        benchmark.
+
+        Review asset performance, allocation and risk
+        before considering any portfolio adjustments.
+        """
+    )
+
+else:
+
+    st.success(
+        """
+        The portfolio appears reasonably aligned with
+        the current target allocation and risk indicators.
+
+        Continue monitoring performance and risk.
+        """
+    )
+
+
+# ---------------------------------------------------
+# Human Oversight Checkpoint
+# ---------------------------------------------------
+
+st.divider()
+
+st.subheader("👤 Human Oversight Checkpoint")
+
+st.warning(
+    """
+    IMPORTANT: This system provides AI-assisted decision support.
+    It does not automatically execute trades or make final
+    investment decisions.
+    """
+)
+
+
+human_decision = st.radio(
+    "How would you like to proceed?",
+    [
+        "Review recommendation",
+        "Approve recommendation for further consideration",
+        "Reject recommendation"
+    ]
+)
+
+
+if human_decision == "Review recommendation":
+
+    st.info(
+        "Recommendation requires human review before any action."
+    )
+
+elif human_decision == "Approve recommendation for further consideration":
+
+    st.success(
+        "Recommendation marked for further human consideration."
+    )
+
+else:
+
+    st.error(
+        "Recommendation rejected by the human reviewer."
+    )
+
+
+# ---------------------------------------------------
+# Disclaimer
+# ---------------------------------------------------
+
+st.caption(
+    "This prototype is for educational and decision-support "
+    "purposes only. It does not constitute financial advice."
+)
