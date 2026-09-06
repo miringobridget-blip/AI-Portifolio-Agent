@@ -247,7 +247,20 @@ st.title(t["title"])
 
 st.write(t["description"])
 
-st.divider()
+# ============================================================
+# DASHBOARD NAVIGATION
+# ============================================================
+
+tab_overview, tab_performance, tab_risk, tab_allocation, tab_ai, tab_reports = st.tabs(
+    [
+        "📊 Overview",
+        "📈 Performance",
+        "⚠️ Risk",
+        "⚖️ Allocation",
+        "🤖 AI Recommendation",
+        "📥 Reports"
+    ]
+)
 
 # ============================================================
 # INVESTOR RISK PROFILE
