@@ -240,6 +240,179 @@ st.bar_chart(performance_chart)
 # Completion message
 # ---------------------------------------------------
 
-st.success(
-    "Portfolio performance analysis completed successfully."
+# ---------------------------------------------------
+# Risk & Volatility Analysis
+# ---------------------------------------------------
+
+st.divider()
+
+st.header("⚠️ Risk & Volatility Analysis")
+
+# Load simulated historical prices
+historical_prices = pd.read_csv(
+    "data/historical_prices.csv"
 )
+
+# Convert Date column to datetime
+historical_prices["Date"] = pd.to_datetime(
+    historical_prices["Date"]
+)
+
+# Set Date as the index
+historical_prices = historical_prices.set_index("Date")
+
+
+# Calculate weekly percentage returns
+historical_returns = historical_prices.pct_change().dropna()
+
+
+# Calculate annualised volatility
+volatility = historical_returns.std() * (52 ** 0.5)
+
+
+# Convert to percentage
+volatility_percentage = volatility * 100
+
+
+# Create risk table
+risk_table = pd.DataFrame({
+    "Asset": volatility_percentage.index,
+    "Annualised Volatility (%)": volatility_percentage.values
+})
+
+
+# Sort from highest to lowest risk
+risk_table = risk_table.sort_values(
+    "Annualised Volatility (%)",
+    ascending=False
+)
+
+
+# Display risk table
+st.subheader("Asset Risk")
+
+st.dataframe(
+    risk_table,
+    use_container_width=True
+)
+
+
+# ---------------------------------------------------
+# Portfolio volatility
+# ---------------------------------------------------
+
+# Portfolio weights based on current portfolio value
+
+portfolio_weights = (
+    portfolio.set_index("Asset")["Current_Value"]
+    / portfolio["Current_Value"].sum()
+)
+
+
+# Keep only assets that have historical prices
+common_assets = portfolio_weights.index.intersection(
+    historical_returns.columns
+)
+
+weights = portfolio_weights[common_assets]
+
+returns_for_portfolio = historical_returns[
+    common_assets
+]
+
+
+# Calculate portfolio historical returns
+portfolio_returns = (
+    returns_for_portfolio * weights
+).sum(axis=1)
+
+
+# Calculate annualised portfolio volatility
+portfolio_volatility = (
+    portfolio_returns.std() * (52 ** 0.5) * 100
+)
+
+
+st.subheader("Overall Portfolio Risk")
+
+st.metric(
+    "Annualised Portfolio Volatility",
+    f"{portfolio_volatility:.2f}%"
+)
+
+
+# ---------------------------------------------------
+# Risk classification
+# ---------------------------------------------------
+
+if portfolio_volatility < 10:
+
+    risk_level = "Low"
+
+elif portfolio_volatility < 20:
+
+    risk_level = "Moderate"
+
+else:
+
+    risk_level = "High"
+
+
+st.metric(
+    "Portfolio Risk Level",
+    risk_level
+)
+
+
+# ---------------------------------------------------
+# Identify unusually risky assets
+# ---------------------------------------------------
+
+st.subheader("🚨 Risk Alerts")
+
+high_risk_assets = risk_table[
+    risk_table["Annualised Volatility (%)"] >= 20
+]
+
+
+if len(high_risk_assets) > 0:
+
+    for _, row in high_risk_assets.iterrows():
+
+        st.warning(
+            f"{row['Asset']} has relatively high "
+            f"annualised volatility of "
+            f"{row['Annualised Volatility (%)']:.2f}%."
+        )
+
+else:
+
+    st.success(
+        "No unusually high-volatility assets "
+        "were detected."
+    )
+
+
+# ---------------------------------------------------
+# Volatility chart
+# ---------------------------------------------------
+
+st.subheader("📉 Asset Volatility")
+
+volatility_chart = risk_table.set_index(
+    "Asset"
+)[["Annualised Volatility (%)"]]
+
+st.bar_chart(
+    volatility_chart
+)
+
+
+# ---------------------------------------------------
+# Completion message
+# ---------------------------------------------------
+
+st.success(
+    "Risk and volatility analysis completed successfully."
+)
+
