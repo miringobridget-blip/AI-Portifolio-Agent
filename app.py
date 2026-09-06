@@ -1035,3 +1035,177 @@ else:
 st.success(t["completed"])
 
 st.caption(t["disclaimer"])
+# ============================================================
+# EXPORT & PORTFOLIO REPORT
+# ============================================================
+
+st.divider()
+
+st.header("📥 Export Portfolio Results")
+
+st.write(
+    "Download your portfolio analysis for further review or reporting."
+)
+
+
+# ============================================================
+# CSV EXPORT
+# ============================================================
+
+csv_data = portfolio[display_columns].to_csv(
+    index=False
+)
+
+st.download_button(
+    label="📥 Download Portfolio Analysis (CSV)",
+    data=csv_data,
+    file_name="portfolio_analysis.csv",
+    mime="text/csv"
+)
+
+
+# ============================================================
+# EXCEL EXPORT
+# ============================================================
+
+import io
+
+excel_buffer = io.BytesIO()
+
+with pd.ExcelWriter(
+    excel_buffer,
+    engine="openpyxl"
+) as writer:
+
+    portfolio[display_columns].to_excel(
+        writer,
+        sheet_name="Portfolio Analysis",
+        index=False
+    )
+
+    allocation_table.to_excel(
+        writer,
+        sheet_name="Allocation Analysis",
+        index=False
+    )
+
+    risk_table.to_excel(
+        writer,
+        sheet_name="Risk Analysis",
+        index=False
+    )
+
+    benchmark_summary = pd.DataFrame({
+        "Metric": [
+            "Portfolio Return",
+            "Benchmark Return",
+            "Performance Difference"
+        ],
+
+        "Value (%)": [
+            portfolio_return,
+            benchmark_return,
+            performance_difference
+        ]
+    })
+
+    benchmark_summary.to_excel(
+        writer,
+        sheet_name="Benchmark",
+        index=False
+    )
+
+
+excel_data = excel_buffer.getvalue()
+
+
+st.download_button(
+    label="📊 Download Portfolio Report (Excel)",
+    data=excel_data,
+    file_name="portfolio_report.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
+
+
+# ============================================================
+# TEXT REPORT
+# ============================================================
+
+portfolio_report = f"""
+AI-POWERED PORTFOLIO MANAGEMENT SYSTEM
+======================================
+
+PORTFOLIO SUMMARY
+-----------------
+Initial Portfolio Value: ${total_initial_value:,.2f}
+Current Portfolio Value: ${total_current_value:,.2f}
+Profit / Loss: ${total_profit_loss:,.2f}
+Portfolio Return: {total_return:.2f}%
+
+RISK ANALYSIS
+-------------
+Annualised Portfolio Volatility: {portfolio_volatility:.2f}%
+Portfolio Risk Level: {risk_level}
+
+BENCHMARK ANALYSIS
+------------------
+Benchmark: {benchmark_name}
+Portfolio Return: {portfolio_return:.2f}%
+Benchmark Return: {benchmark_return:.2f}%
+Performance Difference: {performance_difference:+.2f} percentage points
+
+ALLOCATION ANALYSIS
+-------------------
+"""
+
+for _, row in allocation_table.iterrows():
+
+    portfolio_report += (
+        f"{row['Asset Class']}: "
+        f"Current {row['Current Allocation (%)']:.2f}% | "
+        f"Target {row['Target Allocation (%)']:.2f}% | "
+        f"Status: {row['Status']}\n"
+    )
+
+
+portfolio_report += """
+
+AI-ASSISTED RECOMMENDATION
+--------------------------
+"""
+
+for recommendation in recommendations:
+
+    portfolio_report += (
+        f"- {recommendation}\n"
+    )
+
+
+portfolio_report += """
+
+HUMAN OVERSIGHT
+---------------
+This system provides AI-assisted decision support.
+It does not automatically execute trades or make
+final investment decisions.
+
+The recommendation must be reviewed by a human
+before any investment action is taken.
+
+DISCLAIMER
+----------
+This prototype is for educational and decision-support
+purposes only. It does not constitute financial advice.
+"""
+
+
+# ============================================================
+# DOWNLOAD TEXT REPORT
+# ============================================================
+
+st.download_button(
+    label="📄 Download Portfolio Summary Report",
+    data=portfolio_report,
+    file_name="portfolio_summary_report.txt",
+    mime="text/plain"
+)
